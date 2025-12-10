@@ -1,0 +1,45 @@
+# ===================================================================
+# Docker Compose for AKR Truck Order Optimization System
+# ===================================================================
+
+
+services:
+  # Production API server with Gunicorn
+  api-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: akr-api
+    ports:
+      - "4004:8000"
+    environment:
+      - DATA_API_HOST=${DATA_API_HOST}
+      - DATA_API_USERNAME=${DATA_API_USERNAME}
+      - DATA_API_PASSWORD=${DATA_API_PASSWORD}
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
+      - API_LOG_LEVEL=${API_LOG_LEVEL}
+      - API_KEY=${API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_API_BASE=${LLM_API_BASE}
+      - LLM_MODEL=${LLM_MODEL}
+    volumes:
+      - ./:/app/
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - akr-network
+
+
+networks:
+  akr-network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
